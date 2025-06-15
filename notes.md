@@ -44,3 +44,71 @@ class TrackType extends ObjectType {
 }
 ```
 Since the API returns an array of modules, the graphql server will return the value of each queried field as `null`.
+___
+### Note 4: Is it important for the `args` field to come before the `resolve` field?
+```php
+    $queryType = new ObjectType([
+      'name' => 'Query', 
+      'fields' => [
+        // ...
+        'track' => [
+          'type' => new TrackType(),
+          // is it mandatory for the args to come before the resolve field ? Probably
+          
+          'resolve' => function($_ , $args) {
+            if (!isset($args['trackId'])) {
+                throw new \Exception("trackId was not provided in the query arguments.");
+            }
+            return Track::find($args['trackId']);
+          },
+          'args' => [
+            'trackId' => Type::id()
+          ],
+        ]
+      ]
+    ]);
+```
+NO.The `args` needn't come before the `resolve` (this is logical because fields access isn't restricted by order. As long as the field exists, you can access it with no problems).
+
+___
+### Note 5: If you want to pass an argument to the query, you MUST give it a name
+>[!warning]
+> The below code won't work! It will also throw `Variable \"$my_track_id\" is not defined by operation`.
+```graphql
+  {
+    track(trackId: $my_track_id) {
+      id
+      title
+      modules {
+        id
+        title
+        length
+      }
+    }
+  }
+```
+Then in the variables panel: 
+```json
+  {
+    "my_track_id": "c_0"
+  }
+```
+>[!note]
+> Below is the correct approach.
+We need to explicitly mention that a variable will be passed to our query:
+```graphql
+  query GetTrack($my_track_id: ID) {
+    track(trackId: $my_track_id) {
+       id
+      title
+      modules {
+        id
+        title
+        length
+      }
+    }
+  }
+```
+___
+### Note 6: As obvious as it is, but you should remember to pass the variables to `GraphQL::executeQuery`
+I have spent a couple of minutes wondering why the `$args` array was always empty!
