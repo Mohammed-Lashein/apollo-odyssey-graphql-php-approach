@@ -75,6 +75,22 @@ class GraphQLController {
         'tracksForHome' => [
           'type' => Type::listOf(new TrackType()),
           'resolve' => fn() => Track::all()
+        ],
+        'track' => [
+          'type' => new TrackType(),
+          // is it mandatory for the args to come before the resolve field ? Probably
+          
+          'resolve' => function($_ , $args) {
+
+            if (!isset($args['trackId'])) {
+                throw new \Exception("trackId was not provided in the query arguments.");
+            }
+
+            return Track::find($args['trackId']);
+          },
+          'args' => [
+            'trackId' => Type::id()
+          ],
         ]
       ]
     ]);
@@ -85,13 +101,14 @@ class GraphQLController {
 
     $requestBody = file_get_contents('php://input'); // Raw JSON string from HTTP request
     $parsedBody = json_decode($requestBody, true, 10); // Associative array decoded from JSON
+    // var_dump($parsedBody);
     $queryString = $parsedBody['query']; // The actual GraphQL query string
+    $queryVariables = $parsedBody['variables'];
 
-    $result = GraphQL::executeQuery($schema, $queryString, null, null, null);
+    $result = GraphQL::executeQuery($schema, $queryString, null, null, $queryVariables);
     $result = $result->toArray(DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE);
 
     header('Content-Type: application/json');
     echo json_encode($result);
-
   }
 }
