@@ -78,14 +78,10 @@ class GraphQLController {
         ],
         'track' => [
           'type' => new TrackType(),
-          // is it mandatory for the args to come before the resolve field ? Probably
-          
           'resolve' => function($_ , $args) {
-
             if (!isset($args['trackId'])) {
                 throw new \Exception("trackId was not provided in the query arguments.");
             }
-
             return Track::find($args['trackId']);
           },
           'args' => [
