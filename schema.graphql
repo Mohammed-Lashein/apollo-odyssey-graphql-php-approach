@@ -1,0 +1,30 @@
+# Important: Since I am using Object Types, I will not use this file.
+# It is here for just documentation purposes
+
+# No need for this code since we are not giving aliases for our
+#entry points
+schema {
+query: Query
+# mutation: Mutation
+}
+
+type Query {
+  tracksForHome: [Track]
+  author: Author
+}
+
+type Track {
+  id: ID!
+  title: String
+  thumbnail: String
+  length: Int
+  modulesCount: Int
+  # authorId: String
+  author: Author
+}
+
+type Author {
+  id: ID!
+  name: String
+  photo: String
+}
