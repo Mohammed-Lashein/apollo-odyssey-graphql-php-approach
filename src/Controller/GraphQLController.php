@@ -4,6 +4,8 @@ namespace Src\Controller;
 
 use App\Models\Track;
 use App\Models\Author;
+use App\Models\Module;
+use GraphQL\Error\DebugFlag;
 use GraphQL\GraphQL;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
@@ -24,6 +26,20 @@ class AuthorType extends ObjectType {
   }
 }
 
+
+class ModuleType extends ObjectType {
+  public function __construct() {
+    $config = [
+      'fields' => [
+        'id' => Type::id(),
+        'title' => Type::string(),
+        'length' => Type::int()
+      ],
+    ];
+    parent::__construct($config);
+  }
+}
+
 class TrackType extends ObjectType {
   public function __construct() {
     $config = [
@@ -39,6 +55,11 @@ class TrackType extends ObjectType {
           'resolve' => function($rootValue) {
             return Author::find($rootValue['authorId']);
           }
+        ],
+        'modules' => [
+          'type' => Type::listOf(new ModuleType()),
+          // 'type' => new ModuleType(),
+          'resolve' => fn($parent) => Module::all($parent['id'])
         ]
       ]
       ];
@@ -67,6 +88,7 @@ class GraphQLController {
     $queryString = $parsedBody['query']; // The actual GraphQL query string
 
     $result = GraphQL::executeQuery($schema, $queryString, null, null, null);
+    $result = $result->toArray(DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE);
 
     header('Content-Type: application/json');
     echo json_encode($result);
