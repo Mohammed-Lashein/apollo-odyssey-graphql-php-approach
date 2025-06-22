@@ -8,7 +8,11 @@ header("Access-Control-Allow-Headers: *");
 header("Content-Type: application/json");
 
 // For testing only, never in production!
-ini_set('display_errors', 1);
+// ini_set('display_errors', 1);
+
+// disabling error reporting is important so that errors aren't sent to the client in the graphql response
+error_reporting(0);
+ini_set('display_errors', 0);
 
 use Src\Controller\GraphQLController;
 
