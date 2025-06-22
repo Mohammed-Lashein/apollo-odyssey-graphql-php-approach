@@ -190,3 +190,135 @@ I may download the themes and navigate them when I want to learn from real world
 the `stream_context_create` is like passing `options` object to `fetch` in js.
 It simply adds metadata to the request we are sending to the target resource, instead of the basic functionality of just fetching data from the resource (using `GET` request, the default http method).
 ______
+### Note 8: (My question to chat) Why when I provide the mutation query with a non-existing id, in js I get an exception and the code in the catch block is executed, while in php it is not?
+> Below is the start of my sent question for him, for your reference.
+This code is from `resolvers.js` where I am using apollo-server, on sending an incorrect trackId to the endpoint, the catch block gets executed
+```js
+	Mutation: {
+		incrementTrackNumberOfViews: async (_, {id}, {dataSources}) => {
+			try {
+			const track = await dataSources.trackAPI.incrementTrackNumberOfViews(id)
+			return {
+				code: 200,
+				success: true,
+				message: `successfully increment numberOfViews of track of id: ${id}`,
+				track
+			}
+		} catch(e) {
+			return {
+				code: e.extensions.response.status,
+				success: false,
+				message: e.extensions.response.body,
+				track: null
+			}
+		}
+	}
+}
+```
+
+but in this code equivalent in php, the catch block is never executed since a php warning is triggered instead.
+What can I do to make the code in the catch block get executed?
+
+```php
+$mutationType = new ObjectType([
+  'name' => 'Mutation',
+  'fields' => [
+    'incrementTrackNumberOfViews' => [
+      'type' => new IncrementTrackNumberOfViewsResponse(),
+      'args' => [
+        'id' => Type::id(),
+      ],
+      'resolve' => function($_, $args) {
+        try {
+          $track = Track::incrementNumberOfViewsForTrackWithId($args['id']);
+          return [
+            'code' => 200,
+            'success' => true,
+            'message' => "Hooray! The numberOfViews for track of id: {$args['id']} were updated successfully",
+            'track' => $track
+          ];
+        } catch( \Error $e) {
+          // For debugging
+          var_dump('an err happened on fetching from the endpoint!');
+          var_dump($e->getMessage());
+          return [
+            'code' => 500,
+            'success' => false,
+            'message' => 'An error occurred. Please try again later',
+          ];
+        }
+      }
+    ]
+  ]
+]);
+```
+I thought about removing try..catch since it is not necessary, and depending on the `$result` variable shape the response 
+```php
+$mutationType = new ObjectType([
+  'name' => 'Mutation',
+  'fields' => [
+    'incrementTrackNumberOfViews' => [
+      'type' => new IncrementTrackNumberOfViewsResponse(),
+      'args' => [
+        'id' => Type::id(),
+      ],
+       'resolve' => function($_, $args) {
+          $track = Track::incrementNumberOfViewsForTrackWithId($args['id']);
+          // var_dump($track);//null
+          if(is_null($track)) {
+             return [
+            'code' => 500,
+            'success' => false,
+            'message' => 'An error occurred. Please try again later',
+            'track' => $track
+          ];
+          
+          return [
+            'code' => 200,
+            'success' => true,
+            'message' => "Hooray! The numberOfViews for track of id: {$args['id']} were updated successfully",
+            'track' => null
+          ];
+         
+        }
+      }
+    ]
+  ]
+]);
+```
+
+This solution works, but I wonder why in js the catch block is executed, while in php it is not, even though I am using the same endpoint
+> End of my question
+
+He provided a great answer to me along with some recommendations:
+> I wonder why in js the catch block is executed, while in php it is not, even though I am using the same endpoint?  
+=> Because in js, even though a returned response with a 404 status code is considered a successful http response, but libraries like `apollo-datasource-rest` **throws an exception** when `response.ok` is false. This is intentional behavior.
+```js
+throw new ApolloError('Failed', 404, response.body)
+```
+
+*My interrupting comment*: I personally searched github and couldn't find a class called `ApolloError` in apollo code, but instead `GraphqlError` which was imported from `graphql-js` package.  
+But I get the point that chat wants to explain.
+
+The previously explained behavior is not done automatically for us in php, that's why we get a warning, and `catch` block doesn't get executed.  
+
+Recommended solutions:
+1. convert warnings to excpetions using `set_error_handler` (only in our resolve function, we will restore everything to normal after that)
+2. Check `$track` if it is null or not (as I did initially)
+3. Use `Guzzle` which throws exceptions by default for php errors
+```php
+$client = new \GuzzleHttp\Client();
+try {
+    $response = $client->request('GET', $url);
+} catch (\GuzzleHttp\Exception\RequestException $e) {
+    // This WILL be caught
+}
+```
+I kept the 1st and 2nd approaches in the code for your reference, so feel free to use either in the mutation `incrementTrackNumberOfViews` resolver.
+___
+### Note 9: A nice note about `Throwable`, `Error` and `Exception`
+Quoting [from the docs](https://www.php.net/manual/en/class.throwable.php#throwable.intro):
+>Throwable is the base interface for any object that can be thrown via a `throw` statement, including `Error` and `Exception`.   
+
+Another good quote:  
+> PHP classes cannot implement the **Throwable** interface directly, and must instead extend `Exception`.
