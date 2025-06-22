@@ -49,6 +49,8 @@ class TrackType extends ObjectType {
         'thumbnail' => Type::string(),
         'length' => Type::int(),
         'modulesCount' => Type::int(),
+        'numberOfViews' => Type::int(),
+        'description' => Type::string(),
         'author' => [
           'type' => new AuthorType(),
           // the $rootValue passed is the result of executing the resolve function for the TrackType
