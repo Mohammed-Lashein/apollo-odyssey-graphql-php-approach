@@ -322,3 +322,20 @@ Quoting [from the docs](https://www.php.net/manual/en/class.throwable.php#throwa
 
 Another good quote:  
 > PHP classes cannot implement the **Throwable** interface directly, and must instead extend `Exception`.
+___
+### Note 10: Regarding testing the queries using an api client
+You can use whatever api client you want, but there is one gotcha I want you to be aware of:   
+When you want to make a `PATCH` request to the endpoint that the datsource uses, you still need to make **a `POST` request** to our graphql endpoint, because regardless of what you want to do with other external resources, you always have to call our only endpoint with `POST` as a request method (so don't think that since you want to make a `PATCH` request to the data source that you need to make a `PATCH` request to our graphql endpoint).
+
+Technically you could modify this part in `public/index.php`:
+```php
+if(
+  // airbnb style
+  // https://github.com/airbnb/javascript?tab=readme-ov-file#control-statements
+  $_SERVER['REQUEST_METHOD'] === 'POST' 
+  && $_SERVER['REQUEST_URI'] === "$base_url/graphql"
+  ) {
+  GraphQLController::handle();
+}
+```
+by removing the conditional, but I think keeping it aligns with graphql standards.
