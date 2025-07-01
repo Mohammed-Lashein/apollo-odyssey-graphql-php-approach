@@ -14,7 +14,7 @@ header("Content-Type: application/json");
 error_reporting(0);
 ini_set('display_errors', 0);
 
-use Src\Controller\GraphQLController;
+use App\Http\Controllers\GraphQLController;
 
 /* 
 Since I am using xampp, I wrote the request uri to be like so . 
