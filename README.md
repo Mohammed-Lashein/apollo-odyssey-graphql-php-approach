@@ -339,3 +339,37 @@ if(
 }
 ```
 by removing the conditional, but I think keeping it aligns with graphql standards.
+
+## Scattered notes
+### Note 11: moving from `src` to `app`
+
+I wanted to move `src/Controller/GraphQLController.php` to `app/Http/Controllers/GraphQLController.php` to follow laravel's style.
+
+I used this command:
+```bash
+git mv ./src/Controller/GraphQLController.php ./app/Http/Controllers/GraphQLController.php
+```
+
+Why `git mv` ?  
+=> So that git can recognize this as a rename operation and not a delete/create a new file operation.
+
+But the command didn't work!
+
+After searching, it seems that the `mv` command can't create subdirectories if they are not present.
+
+So the correct approach is to:
+```bash
+mkdir -p app/Http/Controllers; mv src/Controller/GraphQLController.php $_
+```
+
+What about the variable `$_` ?
+It holds the last argument passed to the previous command, it is just easier than retyping the path that we want(which is `app/Http/Controllers`)
+
+I got the command from [this answer on stackoverflow](https://stackoverflow.com/questions/547719/is-there-a-way-to-make-mv-create-the-directory-to-be-moved-to-if-it-doesnt-exis).
+
+___
+
+### Note 12: What happened to `src/Controller` after they became empty?
+
+Since git tracks files and not directories, they were simply discarded by git.   
+If you inspect the source code in the branch `change-project-dir-structure`, you will see that these dirs no longer exist.
