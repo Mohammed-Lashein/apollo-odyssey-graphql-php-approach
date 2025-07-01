@@ -3,7 +3,8 @@
         "psr-4": {
             "App\\": "app/",
             "Core\\": "core/",
-            "Src\\": "src/"
+            "Src\\": "src/",
+            "Types\\": "types/"
         }
     },
     "require": {
