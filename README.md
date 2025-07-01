@@ -366,3 +366,10 @@ What about the variable `$_` ?
 It holds the last argument passed to the previous command, it is just easier than retyping the path that we want(which is `app/Http/Controllers`)
 
 I got the command from [this answer on stackoverflow](https://stackoverflow.com/questions/547719/is-there-a-way-to-make-mv-create-the-directory-to-be-moved-to-if-it-doesnt-exis).
+
+___
+
+### Note 12: What happened to `src/Controller` after they became empty?
+
+Since git tracks files and not directories, they were simply discarded by git.   
+If you inspect the source code in the branch `change-project-dir-structure`, you will see that these dirs no longer exist.
