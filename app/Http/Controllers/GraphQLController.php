@@ -1,6 +1,6 @@
 <?php
 
-namespace Src\Controller;
+namespace App\Http\Controllers;
 
 use App\Models\Track;
 use App\Models\Author;
