@@ -4,6 +4,7 @@
             "App\\": "app/",
             "Core\\": "core/",
             "Src\\": "src/",
+            "Tests\\": "tests/",
             "Types\\": "types/"
         }
     },
@@ -11,6 +12,12 @@
         "webonyx/graphql-php": "^15.20"
     },
     "require-dev": {
-        "symfony/var-dumper": "^7.2"
+        "symfony/var-dumper": "^7.2",
+        "pestphp/pest": "^3.8"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     }
 }
