@@ -373,3 +373,8 @@ ___
 
 Since git tracks files and not directories, they were simply discarded by git.   
 If you inspect the source code in the branch `change-project-dir-structure`, you will see that these dirs no longer exist.
+
+## Testing notes
+
+### Note 13: When we pass `$variables` to the test, will it be in the `json` format or just a normal php associative array?  
+Since we are in the php part of the project, and we are also not sending any data externally, it makes sense to pass the `$variables` to `GraphqQL::executeQuery()` in the form of an associative array.
