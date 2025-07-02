@@ -378,3 +378,7 @@ If you inspect the source code in the branch `change-project-dir-structure`, you
 
 ### Note 13: When we pass `$variables` to the test, will it be in the `json` format or just a normal php associative array?  
 Since we are in the php part of the project, and we are also not sending any data externally, it makes sense to pass the `$variables` to `GraphqQL::executeQuery()` in the form of an associative array.
+
+### Note 14: Why do we need to pass `$variables` even though we can just inline the variable in the query since we are testing ?
+
+That's also a good approach, and in `webonyx/graphql-php` package [they used both approaches](https://github.com/webonyx/graphql-php/blob/master/tests/StarWarsQueryTest.php). I just wanted to stay consistent with the queries I wrote in postman.
